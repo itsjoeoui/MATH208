@@ -1,0 +1,665 @@
+---
+title: "Summarizing_Data"
+output: html_document
+date: "2022-09-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+HTRU2 <- read_csv(here("HTRU2/HTRU_2.csv"), col_names = FALSE)
+```
+```{r}
+names(HTRU2) = c("Mean_IP", "SD_IP", "EK_IP", "SKW_IP",
+                 "Mean_DMSNR", "SD_DMSNR", "EK_DMSNR", "SKW_DMSNR","Class")
+```
+
+```{r}
+head(HTRU2)
+```
+
+```{r}
+HTRU2 <- HTRU2 %>% mutate(Class=ifelse(Class==0, "Negative", "Positive"))
+```
+
+```{r}
+HTRU2 %>% summarise(
+      Average = mean(Mean_IP), Medium = median(Mean_IP),
+      '25%ile' = quantile(Mean_IP, 0.25), 
+      '75%ile' = quantile(Mean_IP, 0.75), 
+      StD = sd(Mean_IP), IQR = IQR(Mean_IP)
+  )
+```
+```{r}
+HTRU2 %>% group_by(Class) %>%
+  summarise(
+      Average = mean(Mean_IP), Medium = median(Mean_IP),
+      '25%ile' = quantile(Mean_IP, 0.25), 
+      '75%ile' = quantile(Mean_IP, 0.75), 
+      StD = sd(Mean_IP), IQR = IQR(Mean_IP)
+  )
+```
+
+```{r}
+HTRU2 %>% group_by(Class) %>% select(Class, Mean_IP, Mean_DMSNR) %>% summarise_all(list(Avg=mean, Med=median))
+
+```
+
+```{r}
+HTRU2 %>% group_by(Class) %>% select(Class, Mean_IP, Mean_DMSNR) %>% summarise_all(list(Avg=mean, Med=median)) %>% pivot_longer(cols=c(Mean_IP_Avg, Mean_DMSNR_Avg, Mean_IP_Med, Mean_DMSNR_Med), names_to = "Measure") %>% arrange(desc(Measure))
+```
+
+```{r}
+HTRU2 %>% group_by(Class) %>% select(Class, Mean_IP, Mean_DMSNR) %>% summarise_all(list(Avg=mean, Med=median)) %>% pivot_longer(cols=starts_with("Mean"), names_to = "Measure") %>% arrange(desc(Measure))
+```
+
+```{r}
+HTRU2 %>% 
+  group_by(Class) %>% 
+  select(Class, Mean_IP, Mean_DMSNR) %>% 
+  summarise_all(list(
+    Avg = mean, 
+    Med = ~median(.), 
+    Q25 = ~quantile(.,probs=c(0.25)),
+    Q75 = ~quantile(.,0.75)
+    )) %>% 
+  pivot_longer(cols=starts_with("Mean"), names_to = "Measure") %>% 
+  pivot_wider(id_cols=Measure, names_from=Class) %>% 
+  arrange(desc(Measure))
+```
+
+```{r}
+HTRU2 %>% 
+  group_by(Class) %>% 
+  summarise(Cor_MeanIP_Mean_DMSNR = cor(Mean_IP, Mean_DMSNR))
+  
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, y=Mean_DMSNR, col=Class)) + 
+  geom_point() + facet_wrap(~Class) +
+  labs(x="Mean IP", y="Mean DMNSR", title="Mean IP vs. Mean DMNSR") +
+  theme(legend.position = "none") + 
+  geom_smooth(method="lm", col="black")
+  
+```
+
+```{r}
+HTRU2 <- HTRU2 %>% mutate(Neg_MDMSNR=-Mean_DMSNR)
+HTRU2 %>% group_by(Class) %>% summarise(Cor2 = cor(Mean_IP, Neg_MDMSNR))
+```
+```{r}
+ggplot(HTRU2,aes(x=Mean_IP,y=Neg_MDMSNR,col=Class)) +
+  geom_point() + facet_wrap(~Class) +
+  labs(x="Mean IP", y="Mean DMSNR", title="Mean IP vs. Mean DMSNR") +
+  theme(legend.position = "none") +
+  geom_smooth(method="lm",col="black")
+```
+```{r}
+crime <- read_csv(here("BostonCrime/crime.csv"))
+```
+
+
+```{r}
+head(crime)
+```
+
+
+```{r}
+names(crime)
+```
+
+
+```{r}
+str(crime)
+```
+
+
+```{r}
+crime %>% group_by(DAY_OF_WEEK) %>% summarise(count=n()) %>% mutate(prop=count/sum(count))
+```
+
+
+```{r}
+crime %>% group_by(DAY_OF_WEEK) %>% summarise(count=n()) %>% mutate(prop=count/sum(count)) %>% arrange(desc(count))
+```
+
+
+```{r}
+crime %>% 
+  group_by(MONTH) %>% 
+  summarise(count=n()) %>% 
+  mutate(prop=count/sum(count)) %>%
+  arrange(MONTH)
+```
+
+
+```{r}
+month.abb
+```
+
+
+```{r}
+crime <- crime %>% mutate(Month = month.abb[MONTH])
+```
+
+
+```{r}
+crime %>% select(MONTH, Month) %>% slice(1:5)
+```
+
+
+```{r}
+crime %>% group_by(Month) %>% summarise(count=n()) %>%
+  mutate(prop = count/sum(count)) %>% arrange(Month)
+```
+
+
+```{r}
+courses = c("MATH 203", "MATH 204", "MATH 208", "MATH 324",
+            "MATH 423", "MATH 447","MATH 523", "MATH 525", 
+            "MATH 533", "MATH 545")
+```
+
+
+```{r}
+class(courses)
+```
+
+
+```{r}
+courses_fct = factor(courses)
+```
+
+
+```{r}
+mode(courses_fct)
+```
+
+
+```{r}
+attributes(courses_fct)
+```
+
+```{r}
+crime <- crime %>% 
+  mutate(Day_of_week=fct_relevel(DAY_OF_WEEK, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
+```
+
+
+```{r}
+crime %>% group_by(Day_of_week) %>% summarize(count=n()) %>% mutate(prop=count/sum(count))
+```
+
+
+```{r}
+crime <- crime %>% mutate(Month = fct_relevel(Month, month.abb))
+```
+
+
+```{r}
+crime_by_month = crime %>% group_by(Month) %>% summarise(count=n()) %>% mutate(prop=count/sum(count)) %>% arrange(Month)
+crime_by_month
+```
+```{r}
+ggplot(crime_by_month, aes(x="", y=count, fill=Month)) + 
+  geom_bar(stat="identity") +
+  coord_polar("y", start=0) 
+```
+
+
+```{r}
+ggplot(crime_by_month, aes(x="", y=prop, fill=Month)) + 
+  geom_bar(stat="identity") +
+  coord_polar("y", start=0) 
+```
+
+
+```{r}
+ggplot(crime_by_month, aes(x="", y=count, fill=Month)) + 
+  geom_bar(stat="identity") +
+  coord_polar("y", start=0) +
+  scale_fill_viridis_d()
+```
+
+
+```{r}
+ggplot(crime, aes(x=Month, fill=Month)) + 
+  geom_bar() + 
+  scale_fill_viridis_d() + 
+  ylab("Total number of crimes")
+```
+
+
+```{r}
+ggplot(crime, aes(x=Month, fill=Month)) + 
+  geom_bar(aes(y=..count../sum(..count..))) + 
+  scale_fill_viridis_d() + 
+  ylab("Total number of crimes")
+```
+
+
+```{r}
+crime %>% group_by(OFFENSE_CODE_GROUP) %>%
+  summarise(count=n()) %>%
+  mutate(prop=count/sum(count)) %>%
+  arrange(desc(prop))
+```
+
+
+```{r}
+off_code_counts <- crime %>% 
+  group_by(OFFENSE_CODE_GROUP) %>%
+  summarise(count=n()) %>% 
+  mutate(prop=count/sum(count))
+```
+
+
+```{r}
+ggplot(off_code_counts, aes(x=OFFENSE_CODE_GROUP, fill=OFFENSE_CODE_GROUP)) +
+  geom_bar(stat='identity', aes(y=prop)) + scale_fill_viridis_d() + ylab("Proportion of crime")
+```
+
+
+```{r}
+crime <- crime %>%
+  mutate(code_lmp=fct_lump(OFFENSE_CODE_GROUP, 12))
+```
+
+```{r}
+head(crime)
+```
+
+
+```{r}
+off_code_counts_lmp <- crime %>%
+  group_by(code_lmp) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(prop=n/sum(n)) %>%
+  arrange(n)
+off_code_counts_lmp
+```
+
+
+```{r}
+ggplot(off_code_counts_lmp, aes(x=code_lmp, fill=code_lmp)) + geom_bar(stat="identity", aes(y=prop)) + scale_fill_viridis_d() + ylab("Proportion of crimes")
+```
+
+
+```{r}
+off_code_counts_lmp <- off_code_counts_lmp %>%
+  mutate(code_lmp = fct_reorder(code_lmp, n,.desc=TRUE))
+
+ggplot(off_code_counts_lmp,aes(x=code_lmp,fill=code_lmp)) +
+  geom_bar(stat="identity",aes(y=prop)) + 
+  scale_fill_viridis_d() +
+  ylab("Proportion of crimes")
+```
+
+
+```{r}
+library(treemapify)
+```
+
+
+```{r}
+ggplot(off_code_counts_lmp, aes(area=n, fill=code_lmp)) + geom_treemap() + scale_fill_viridis_d()
+```
+
+```{r}
+off_code_counts <- off_code_counts %>% mutate(OFFENSE_CODE_GROUP = fct_reorder(OFFENSE_CODE_GROUP,count, .desc=TRUE))
+```
+
+```{r}
+p <- ggplot(off_code_counts, aes(area=count, fill=OFFENSE_CODE_GROUP)) + geom_treemap()
+
+```
+
+
+```{r}
+class(p)
+```
+
+```{r}
+attributes(p)
+```
+
+```{r}
+print(p)
+```
+
+
+```{r}
+p + theme(legend.position = "none")
+```
+
+
+```{r}
+library(ggpubr)
+```
+
+
+```{r}
+as_ggplot(get_legend(p+theme(legend.text=element_text(size=8))))
+```
+
+
+```{r}
+crime = crime %>% mutate(code_lmp = fct_infreq(code_lmp))
+
+```
+
+
+```{r}
+ggplot(crime, aes(x=Month, fill=code_lmp)) + geom_bar() + scale_fill_viridis_d()
+```
+
+```{r}
+ggplot(crime, aes(x=code_lmp, fill=code_lmp)) + 
+  geom_bar(position="dodge")+facet_wrap(~Month) + 
+  scale_fill_viridis_d() + 
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()
+        )
+```
+```{r}
+library(ggmosaic)
+```
+
+
+```{r}
+ggplot(crime) + geom_mosaic(aes(x=product(code_lmp, Day_of_week),  fill=Day_of_week)) +
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+```
+
+```{r}
+ggplot(crime) + geom_mosaic(aes(x=product(Day_of_week, code_lmp),  fill=code_lmp)) +
+    theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+```
+
+
+```{r}
+crime %>% select(OCCURRED_ON_DATE) %>% head(20)
+```
+
+
+```{r}
+crime %>% summarise(min=min(OCCURRED_ON_DATE), med = median(OCCURRED_ON_DATE), max = max(OCCURRED_ON_DATE))
+```
+
+
+```{r}
+crime %>% pull(OCCURRED_ON_DATE) %>% class(.)
+```
+
+
+```{r}
+crime %>% pull(OCCURRED_ON_DATE) %>% head(20) %>% as.numeric(.)
+```
+
+
+```{r}
+library(lubridate)
+```
+
+
+```{r}
+my_date <- "2003-05-29"
+class(my_date)
+```
+
+
+```{r}
+my_date <- ymd(my_date)
+class(my_date)
+```
+
+
+```{r}
+other_date = ymd_hms("2009-05-02 02:57:00", tz="America/Montreal")
+```
+
+
+```{r}
+other_date
+```
+
+
+```{r}
+my_date + days(-2:2)
+```
+
+
+```{r}
+my_date + months(-1:1)
+```
+
+
+```{r}
+now()
+```
+
+```{r}
+today() - my_date
+```
+
+
+```{r}
+interval(other_date, now()) / years(1)
+```
+
+
+```{r}
+by_date_tbl = crime %>% mutate(date_only = date(OCCURRED_ON_DATE)) %>%
+  group_by(date_only) %>%
+  summarise(count=n())
+```
+
+
+```{r}
+by_date_tbl %>% arrange(desc(count)) %>% head(5)
+```
+
+
+```{r}
+ggplot(by_date_tbl, aes(x=date_only, y=count)) + geom_line() + geom_smooth()
+```
+
+
+```{r}
+by_month_tbl  = crime %>% group_by(YEAR,Month) %>%
+  summarise(count=n())
+```
+
+
+```{r}
+by_month_tbl %>% arrange(desc(count)) %>% head(5)
+```
+
+
+```{r}
+by_month_tbl = by_month_tbl %>% ungroup() %>% mutate(Month_Year=factor(interaction(Month, YEAR)))
+```
+
+
+```{r}
+Jan_levels = by_month_tbl %>% filter(Month=="Jan") %>% pull(Month_Year) %>% unique(.)
+```
+
+```{r}
+tibble(Jan_levels, as.numeric(Jan_levels))
+```
+
+
+```{r}
+ggplot(by_month_tbl,aes(x=Month_Year,y=count, group=1)) +
+  geom_point() +   geom_line() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(x="Date",y="Count",title="Number of crimes by month") +
+  geom_vline(xintercept=as.numeric(Jan_levels),
+             col="red",linetype="dashed")
+```
+
+
+```{r}
+crime = crime %>% mutate(First_of_month = floor_date(OCCURRED_ON_DATE, "month"))
+```
+
+
+```{r}
+crime %>% slice(sample(x=1:n(),size=10)) %>%
+  select(OCCURRED_ON_DATE,First_of_month)
+```
+```{r}
+by_month_tbl2  = crime %>% group_by(First_of_month) %>%
+  summarise(count=n())
+
+ggplot(by_month_tbl2,aes(x=First_of_month,y=count)) +
+  geom_point() +   geom_line() +
+  labs(x="Date",y="Count",title="Number of crimes by month") +
+  geom_vline(xintercept=
+               as.POSIXct(c("2016-01-01","2017-01-01","2018-01-01")),
+             col="red",linetype="dashed")
+ 
+```
+
+
+```{r}
+1/0
+```
+
+
+```{r}
+exp(-Inf)
+```
+
+
+```{r}
+0/0
+```
+
+
+```{r}
+sqrt(-1)
+```
+
+```{r}
+sqrt(as.complex(-1))
+```
+
+
+```{r}
+c(1,2,3,-Inf) + c(NA, Inf, NaN, Inf)
+```
+
+
+```{r}
+as.numeric("My Missing Value")
+```
+
+
+```{r}
+as.numeric(factor("My Missing Value"))
+```
+
+
+```{r}
+c(1, "3")
+```
+
+
+```{r}
+as.numeric(c(1, "3"))
+```
+
+
+```{r}
+crime %>% summarise_all(list(~sum(is.na(.)))) %>% pivot_longer(cols=everything(), names_to = "Variable")
+```
+
+
+```{r}
+crime %>% summarise_all(list(~sum(is.na(.)))) %>% pivot_longer(cols=everything(), names_to = "Variable") %>% filter(value>0)
+```
+
+
+```{r}
+crime_no_na <- crime %>% drop_na()
+```
+
+
+```{r}
+crime %>% summarise(n())
+```
+
+
+```{r}
+crime_no_na %>% summarise(n())
+```
+
+
+```{r}
+crime %>% drop_na(UCR_PART) %>% summarise(n())
+```
+
+```{r}
+crime %>% pull(code_lmp) %>% unique(.) %>% sort(.)
+```
+
+
+```{r}
+crime = crime %>% 
+  mutate(
+    code_lmp_alt = recode(code_lmp,
+                          'Investigate Person' = "Investigate",
+                          'Investigate Property' = "Investigate",
+                          'Motor Vehicle Accident Response' = "Motor Vehicle",
+                          'Larceny From Motor Vehicle' = "Motor Vehicle"
+                          )
+    )
+```
+
+
+```{r}
+crime %>% group_by(code_lmp_alt) %>% summarise(count=n()) %>% arrange(desc(count))
+```
+
+
+```{r}
+crime %>% group_by(Location) %>% summarise(count=n()) %>% arrange(desc(count))
+```
+
+
+```{r}
+crime = crime %>% 
+  mutate(
+    Location_alt = fct_recode(Location,
+                              NULL = "(-1.00000000, -1.00000000)",
+                              NULL = "(0.00000000, 0.00000000)"
+                              )
+    )
+```
+
+
+```{r}
+crime %>% group_by(Location_alt) %>% summarise(count=n()) %>% arrange(desc(count))
+```
+
+
+```{r}
+```
+

@@ -1,0 +1,171 @@
+---
+title: "Exploring_Data"
+output: pdf_document
+date: "2022-09-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+HTRU2 <- read_csv("HTRU2/HTRU_2.csv", col_names=FALSE) 
+
+# Name the variables 
+names(HTRU2) = c("Mean_IP", "SD_IP", "EK_IP", "SKW_IP", "Mean_DMSNR", "SD_DMSNR", "EK_DMSNR", "SKW_DMSNR", "Class")
+
+head(HTRU2)
+class(HTRU2)
+```
+```{r}
+HTRU2 <- HTRU2 %>% mutate(Class=factor(ifelse(Class==0,"Negative","Positive")))
+head(HTRU2)
+```
+
+Bad attempt
+```{r}
+ggplot(HTRU2,aes(x=Class, y=Mean_IP)) + geom_point() + xlab("Mean IP") +facet_grid()
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP)) + geom_histogram(bins=25,col="black",fill="lightblue")
+```
+
+```{r}
+ggplot(HTRU2, aes(x=SD_IP)) + geom_histogram(bins=25,col="black",fill="lightblue")
+```
+```{r, echo=FALSE}
+library(gridExtra)
+
+p1 = ggplot(HTRU2, aes(x=Mean_IP)) +
+geom_histogram(bins=10,col="black",fill="lightblue") +
+ggtitle("Mean IP: 10 bins") 
+
+p2 = ggplot(HTRU2, aes(x=Mean_IP)) +
+geom_histogram(bins=40,col="black",fill="lightblue") +
+ggtitle("Mean IP: 40 bins") 
+
+grid.arrange(p1,p2)
+```
+
+```{r}
+head(HTRU2)
+ggplot(HTRU2, aes(x=Mean_IP, group=Class, fill=Class)) + geom_histogram(bins=25, col="black") + facet_wrap(~Class)
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, group=Class, fill=Class)) + geom_histogram(bins=25, col="black") + facet_grid(rows=vars(Class))
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, group=Class, fill=Class)) + geom_histogram(bins=25, col="black")
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, group=Class, fill=Class)) + geom_histogram(bins=25, col="black", position="dodge")
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, group=Class, fill=Class)) + geom_histogram(aes(y=..density..),bins=25, col="black") 
+```
+
+
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, group=Class, fill=Class)) + geom_histogram(aes(y=..density..),bins=25, col="black", position="dodge") 
+```
+
+```{r}
+ggplot(HTRU2, aes(x=NULL, y=Mean_IP)) + geom_boxplot() + xlab("") + ylab("Mean IP")
+```
+```{r}
+ggplot(HTRU2, aes(x=NULL, y=Mean_IP)) + stat_boxplot(geom="errorbar", width=0.25)+ geom_boxplot() + xlab("") + ylab("Mean IP")
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Class, y=Mean_IP)) + geom_boxplot() + xlab("") + ylab("Mean IP")
+```
+
+
+
+
+```{r}
+ggplot(HTRU2, aes(x=Class, y=Mean_IP, fill=Class)) + stat_boxplot(geom="errorbar", width=0.25)+geom_boxplot() + xlab("") + ylab("Mean IP")
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, class=Class, fill=Class)) +geom_density(size=1.5) + xlab("Mean IP")
+```
+
+```{r}
+ggplot(HTRU2, aes(x=Mean_IP, group=Class)) + geom_histogram(aes(y=..density.., fill=Class), col="black", alpha = 0.4, bins=60) + geom_density(size=1.5, adjust=0.25) + xlab("Mean IP")
+```
+```{r}
+ ggplot(HTRU2,aes(x=Mean_IP,y=Mean_DMSNR, col=Class)) + geom_point() +
+  xlab("Mean IP") + ylab("Mean DMSNR")
+```
+
+```{r}
+ ggplot(HTRU2,aes(x=Mean_IP,y=Mean_DMSNR, col=Class)) + geom_point() +
+  xlab("Mean IP") + ylab("Mean DMSNR") + coord_flip()
+```
+
+```{r}
+ ggplot(HTRU2,aes(x=Mean_IP,y=SD_IP, col=Class)) + geom_point() +
+  xlab("Mean IP") + ylab("Mean DMSNR")
+```
+
+```{r}
+ ggplot(HTRU2,aes(x=Mean_IP,y=SD_IP, col=SKW_IP)) + geom_point() +
+  xlab("Mean IP") + ylab("Mean DMSNR") 
+```
+
+```{r}
+ ggplot(HTRU2,aes(x=Mean_IP,y=SKW_IP)) + geom_bin2d(bins=100) +
+  labs(x="Mean IP", y="Skew IP") 
+```
+
+```{r}
+ggplot(HTRU2,aes(x=Mean_IP,y=SD_IP)) + geom_bin2d(bins=100) + scale_fill_continuous(type="viridis") + labs(x="Mean IP", y="Skew IP") 
+```
+
+```{r}
+ ggplot(HTRU2,aes(x=Mean_IP,y=SD_IP)) +
+  geom_density_2d(col="red") +
+  labs(x="Mean IP",y="SD IP") +
+  ylim(c(0,100)) +
+  xlim(c(0,200))
+```
+
+```{r}
+ ggplot(HTRU2,aes(x=Mean_IP,y=SD_IP)) + geom_point(size=0.1) +
+  geom_density_2d(col="red") + labs(x="Mean IP",y="SD IP") +
+  ylim(c(0,100)) +
+  xlim(c(0,200))
+```
+
+```{r}
+ggplot(HTRU2,aes(x=Mean_IP,y=SD_IP)) + stat_density_2d(bins=100, aes(fill=..level..), geom="polygon") + labs(x="Mean IP", y="Skew IP") 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

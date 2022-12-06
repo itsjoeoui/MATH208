@@ -1,0 +1,196 @@
+---
+title: "Tutorial 1"
+author: "Nicholas Kiriazis"
+date: "2022-09-09"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+NOTE: Some of the cells will lead to errors. This is for illustrative purposes.
+
+A lot of cells have no description, the idea is that you should think about what the code will do, and run the cell AFTER to see the behavior.
+
+## Reading Data
+
+```{r}
+test = read.csv("Tutorial01_09-09_data.csv")
+
+test
+```
+
+```{r}
+test = read.csv("Tutorial01_09-09_data.csv", colClasses = c("character", "numeric"))
+
+test
+```
+
+## Vectors
+
+### Declarations
+
+```{r}
+y = vector(length=2)
+y[1] = "a"
+y[2] = "b"
+
+y
+```
+
+```{r}
+y[3]
+```
+
+```{r}
+y[3] = "c"
+y
+```
+
+
+### Quirks of casting
+
+Defining some test vectors.
+```{r}
+c1 = c(1,2,3)
+c2 = c(4,5,6,0,0,0)
+c3 = c(7,8)
+c4 = c(1,2,"3")
+```
+
+Some quirky examples of casting 
+
+```{r}
+c1 + 7
+```
+
+```{r}
+c1+c1
+```
+
+```{r}
+c1 + c2
+```
+
+```{r}
+c1*c3
+```
+
+```{r}
+c1 + c4
+```
+
+```{r}
+c1[1] + c4[1]
+```
+
+## Lists
+
+Shamelessly stealing Professor Steele's list example
+```{r}
+U1 = c(203, 204)
+U2 = c(323,324)
+U3 = c(208,427,423,523,545)
+
+mymcgill_stats = list(U1,U2,U3,"Statistics Major")
+
+mymcgill_stats
+```
+
+Run this cell twice and see what happens
+```{r}
+print(names(mymcgill_stats))
+
+names(mymcgill_stats) = c("U1", "U2", "U3", "Major")
+
+print(names(mymcgill_stats))
+
+print("------")
+mymcgill_stats
+```
+
+
+Trying to access elements
+```{r}
+mymcgill_stats$Major
+```
+
+
+```{r}
+mymcgill_stats[1] 
+mymcgill_stats[2] 
+
+mymcgill_stats[1] + mymcgill_stats[2]
+```
+
+```{r}
+mymcgill_stats[1] 
+mymcgill_stats[[1]] 
+```
+
+```{r}
+mymcgill_stats[[1]] + mymcgill_stats[[2]]
+mymcgill_stats$U1 + mymcgill_stats$U2
+```
+
+
+```{r}
+mymcgill_stats[c(1,2)]
+```
+
+```{r}
+mymcgill_stats[[c(1,2)]]
+```
+Often times "mistakes" will still produce output, just not in ways you expect. For example, assuming you want to look at the elements inside the U1 list.
+```{r}
+# This loops through the courses
+u1_a = mymcgill_stats[[1]]
+
+for(i in 1:length(u1_a)){
+  print(u1_a[i])
+}
+
+print("-----")
+
+# This loops through a list with one element
+u1_b = mymcgill_stats[1]
+
+for(i in 1:length(u1_b)){
+  print(u1_b[i])
+}
+```
+
+## Named vectors
+
+```{r}
+test_vector = c(1,2,3)
+test_vector
+names(test_vector) = c("a", "b", "c")
+test_vector
+```
+The "class" function is infinitely useful (especially when working with a new package).
+```{r}
+class(mymcgill_stats)
+```
+
+```{r}
+test_vector[1]
+```
+
+```{r}
+test_vector[4] = 4
+
+test_vector
+
+```
+
+```{r}
+test_list = as.list(test_vector)
+test_list
+```
+
+```{r}
+test_list$a
+```
+

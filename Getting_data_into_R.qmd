@@ -1,0 +1,530 @@
+---
+title: "Getting data into R"
+format: html
+editor: visual
+---
+
+## Quarto
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+HTRU2 <- read_csv("HTRU2/HTRU_2.csv")
+```
+
+```{r}
+head(HTRU2)
+```
+
+```{r}
+names(HTRU2) # The variables are not named, let's name them!
+```
+
+```{r}
+names(HTRU2) = c("Mean_IP", "SD_IP", "EK_IP", "SKW_IP",
+                 "Mean_DMSNR", "SD_DMSNR", "EK_DMSNR", "SKW_DMSNR","Class")
+names(HTRU2)
+```
+
+```{r}
+class(HTRU2) # Class goes from specific to general
+```
+
+Everything in R is a vector
+
+```{r}
+Lengths_A <- c(52,51,60,64,69,74,78,84,86,96,104,112,118,125,132,135)
+class(Lengths_A)
+mode(Lengths_A)
+```
+
+'mode' is a **mutually exclusive** classification of objects according to their basic structure. The 'atomic' modes are numeric, complex, character and logical. Recursive objects have modes such as 'list' or 'function' or a few others. An object has one and only one mode.
+
+'class' is a property assigned to an object that determines how generic functions operate with it. It is not a mutually exclusive classification. If an object has no specific class assigned to it, such as a simple numeric vector, it's class is usually the same as its mode, by convention.
+
+    x <- 1L
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "integer"      "numeric"      "integer"      "integer"
+
+    x <- 1
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "numeric"      "numeric"      "double"       "double" 
+
+    x <- letters
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "character"    "character"    "character"    "character"
+
+    x <- TRUE
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "logical"      "logical"      "logical"      "logical"
+
+    x <- cars
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "data.frame"   "list"         "list"         "list"   
+
+    x <- cars[1]
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "data.frame"   "list"         "list"         "list"      
+
+    x <- cars[[1]]
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "numeric"      "numeric"      "double"       "double" 
+
+    x <- matrix(cars)
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "matrix"       "list"         "list"         "list"  
+
+    x <- new.env()
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "environment"  "environment"  "environment"  "environment"
+
+    x <- expression(1 + 1)
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "expression"   "expression"   "expression"   "expression"
+
+    x <- quote(y <- 1 + 1)
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "<-"           "call"         "language"     "language"
+
+    x <- ls
+    print(c(class(x), mode(x), storage.mode(x), typeof(x)))
+    [1] "function"     "function"     "function"     "closure"
+
+Index starts at 1, not 0
+
+```{r}
+Lengths_A[1]
+Lengths_A[1] = 53
+Lengths_A[1]
+```
+
+```{r}
+# Kinda weird and not safe in my opinion but ok
+basic = c(1,2,3) 
+basic[5] = 5 
+print(basic)
+```
+
+```{r}
+author_list = c("J.K. Rowling", "Stephen King","Michael Lewis", 
+                "Toni Morrison","David McCullough") 
+mode(author_list)
+class(author_list)
+```
+
+```{r}
+boolean_vec = c(TRUE,FALSE,TRUE) 
+mode(boolean_vec)
+class(boolean_vec)
+```
+
+The rep function is pretty useful
+
+```{r}
+Lengths_A
+Lengths_A + rep(1,16)
+```
+
+```{r}
+1:9
+mode(1:9)
+class(1:9)
+1L:9L
+mode(1L:9L)
+class(1L:9L)
+```
+
+```{r}
+# They do the same thing
+Lengths_A / rep(2.54,16)
+Lengths_A / 2.54
+```
+
+```{r}
+# Smart boi
+c(1,2,3,4)+c(3,5)
+```
+
+```{r}
+sum(c(3,5,NA))
+sum(c(3,5,NA),na.rm=T)
+sum(c(3,5,7),c(1,1,1))
+```
+
+```{r}
+# or we can just use help
+args(mean)
+args(mean.default)
+methods("mean")
+```
+
+```{r}
+X <- matrix(1:9,nrow=3,ncol=3) 
+X
+class(X)
+mode(X)
+```
+
+```{r}
+attributes(X)
+dim(X)
+```
+
+Let's do some sub-scripting!
+
+```{r}
+X
+```
+
+```{r}
+# Row first, Col second
+X[2,2]
+X[3,1]
+```
+
+```{r}
+# Matrix multiplication
+X %*% t(X)
+# Simply multiply cell by cell
+X * t(X)
+```
+
+### IMPORTANT
+
+As mentioned, everything in R is a vector.
+
+What we have seen above are atomic vectors. Beside atomic vectors, there are also lists.
+
+![](images/CleanShot%202022-12-06%20at%2014.24.06@2x.png){width="275"}
+
+Another way to look at data types:
+
+| Dimension | Homogeneous   | Heterogeneous |
+|:----------|:--------------|---------------|
+| 1d        | Atomic vector | List          |
+| 2d        | Matrix        | Data frame    |
+| nd        | Array         |               |
+
+Now let's look at some lists
+
+```{r}
+U1 = c(203, 204) 
+U2 = c(323,324,447) 
+U3 = c(208,427,423,523,545)
+mymcgill_stats = list(U1,U2,U3,"Statistics Major")
+mymcgill_stats
+```
+
+The elements above only has number index, no naming, let's add some names to it.
+
+```{r}
+mymcgill_stats = list(U1=U1,U2=U2,U3=U3,Major = "Statistics Major")
+mymcgill_stats
+```
+
+Some different ways of indexing
+
+```{r}
+mymcgill_stats[["U2"]]
+mymcgill_stats[[2]]
+mymcgill_stats$U2
+```
+
+```{r}
+mymcgill_stats["U2"]
+mymcgill_stats[2]
+```
+
+```{r}
+mymcgill_stats[c(2,3)]
+mymcgill_stats[c("U1","U3")]
+```
+
+```{r}
+mymcgill_stats
+```
+
+```{r}
+mymcgill_stats[[c(1,2)]] # Recursive indexing 1st of outer, 2nd of inner
+mymcgill_stats[[1:2]] # Recursive indexing 1st of outer, 2nd of inner
+```
+
+```{r}
+mymcgill_stats[[1]][2] # Access vector, access 2nd element
+mymcgill_stats[[1]][[2]] # Access vector, access 2nd element
+```
+
+```{r}
+mymcgill_stats[1]$U1[2] # Access list, access U1, access 2nd element
+mymcgill_stats$U1[2] # Access list, access U1, access 2nd element
+```
+
+Move on to 2d: data.frame
+
+```{r}
+htru2_df <- read.csv("HTRU2/HTRU_2.csv", header=FALSE)
+class(htru2_df) # read.csv gives a data.frame
+class(HTRU2) # read_csv gives a tibble
+```
+
+```{r}
+head(htru2_df)
+```
+
+```{r}
+htru2_tbl = read_csv("HTRU2/HTRU_2.csv",
+                     col_names =FALSE)
+class(htru2_tbl)
+```
+
+```{r}
+htru2_tbl
+htru2_df
+```
+
+```{r}
+head(as.data.frame(htru2_tbl))
+head(htru2_df)
+```
+
+```{r}
+mymcgill_stats_tbl = tibble(Courses=list(U1=U1,U2=U2,U3=U3), 
+                            Year = c("U1","U2","U3"), 
+                            Major = rep("Statistics Major",3)) 
+mymcgill_stats_tbl
+```
+
+```{r}
+names(attributes(htru2_tbl))
+attributes(htru2_tbl)$names
+attributes(htru2_tbl)$class
+```
+
+```{r}
+names(htru2_tbl) = c("Mean_IP", "SD_IP", "EK_IP", "SKW_IP", "Mean_DMSNR", 
+                    "SD_DMSNR", "EK_DMSNR", "SKW_DMSNR", "Class")
+```
+
+```{r}
+htru2_tbl
+```
+
+Let's now do some subsettings on atomic vectors and lists
+
+```{r}
+Lengths_A
+Lengths_A[c(1,3,4)] # extracting the indexes
+```
+
+```{r}
+# Just like how it works in Python
+Lengths_A > 100
+Lengths_A[Lengths_A > 100]
+```
+
+```{r}
+mymcgill_stats
+```
+
+```{r}
+mymcgill_stats[c(1,3)]
+```
+
+```{r}
+# Apply the length function to each element in the list (also works for vector)
+lapply(mymcgill_stats,length)
+```
+
+`lapply` returns a list of the same length as `X`, each element of which is the result of applying `FUN` to the corresponding element of `X`.
+
+`sapply` is a user-friendly version and wrapper of `lapply` by default returning a vector, matrix or, if `simplify = "array"`, an array if appropriate, by applying `simplify2array()`.`sapply(x, f, simplify = FALSE, USE.NAMES = FALSE)` is the same as `lapply(x, f)`.
+
+```{r}
+lapply(mymcgill_stats, class)
+```
+
+```{r}
+mymcgill_stats[lapply(mymcgill_stats,length) < 4]
+```
+
+Subsetting 2d stuff
+
+```{r}
+A_mat = matrix(c(1:12),ncol=3,nrow=4,byrow=T) 
+A_mat
+```
+
+```{r}
+A_mat[3,2]
+```
+
+```{r}
+A_mat[c(1:3),] # empty means everything
+A_mat[,c(1,3)]
+A_mat[c(1:3),c(1,3)]
+```
+
+```{r}
+# Doesn't seem too useful but okay
+A_mat[c(TRUE,TRUE,TRUE,FALSE),c(TRUE,TRUE,FALSE)]
+```
+
+```{r}
+A_mat %% 2
+```
+
+```{r}
+## %% is the mod operator
+A_mat %% 2 == 0
+```
+
+```{r}
+A_mat[A_mat %% 2 == 0]
+```
+
+How about 2d data frames
+
+```{r}
+names(htru2_df) = names(htru2_tbl) 
+head(htru2_df)
+```
+
+```{r}
+htru2_df[1:3,]
+```
+
+```{r}
+htru2_df[1:5,1:2]
+```
+
+```{r}
+htru2_df_MIP14 = htru2_df[htru2_df$Mean_IP > 140,1:3]
+# or c("Mean_IP","SD_IP","Class") instead of 1:3
+htru2_df_MIP14
+```
+
+```{r}
+head(htru2_df[htru2_df$Mean_IP > 140,c("Mean_IP","SD_IP","Class")])
+```
+
+We can also using the subset function instead of indexing it.
+
+```{r}
+htru2_df_MIP14_sub = subset(htru2_df,Mean_IP>140)
+head(htru2_df_MIP14_sub)
+```
+
+After 2d data.frame, let's look at tibble
+
+```{r}
+htru2_tbl[1:3,c(1,5,9)]
+htru2_tbl[1:3,c("Mean_IP","SD_IP","Class")]
+```
+
+We can also use the select function for tibble
+
+```{r}
+head(select(htru2_tbl, Mean_IP, SD_IP))
+```
+
+```{r}
+slice(htru2_tbl,1:3)
+```
+
+```{r}
+slice(select(filter(htru2_tbl, Mean_IP > 140), Mean_IP, SD_IP),1:5)
+```
+
+```{r}
+filter(select(slice(htru2_tbl,1:5), Mean_IP,SD_IP),Mean_IP>140)
+```
+
+### Creating a data.frame or tibble
+
+```{r}
+Lengths_B <- c(51,53.5,56,66,68,72.5,79,80,81,91,96.8,101,110) 
+Lengths_C <- c(52.5,49.5,60,65,67,74,78, 79,83,90)
+```
+
+```{r}
+Dates_A <- c("2009-05-02","2009-05-11","2009-07-07","2009-09-09", "2009-11-16",
+             "2010-02-16","2010-05-03","2010-11-09", "2011-05-04","2012-05-03",
+             "2013-05-18","2014-07-30", "2015-09-30","2016-06-08","2017-08-21",
+             "2018-09-19")
+
+mode(Dates_A)
+class(Dates_A)
+```
+
+Convert everything to date
+
+```{r}
+Dates_A <- as.Date(Dates_A)
+mode(Dates_A)
+class(Dates_A)
+```
+
+```{r}
+head(Dates_A)
+head(as.numeric(Dates_A))
+```
+
+```{r}
+Dates_B <- as.Date(c("2012-08-02","2012-08-15","2012-10-31","2012-1206", "2013-02-18",
+                     "2013-05-13","2013-09-05","2014-0217", "2014-07-30","2015-09-30",
+                     "2016-08-04","2017-0821","2018-09-19"))
+
+Dates_C <- as.Date(c("2016-02-04","2016-02-18","2016-04-11","2016-0608", "2016-08-04",
+                     "2016-11-17","2017-03-02","2017-08-21","2018-02-20","2019-02-13"))
+```
+
+Creating a data.frame
+
+```{r}
+kids_heights_df <- data.frame(Kid = c(rep("A",length(Lengths_A)), 
+                                      rep("B",length(Lengths_B)), 
+                                      rep("C",length(Lengths_C))), 
+                              Heights = c(Lengths_A,Lengths_B,Lengths_C), 
+                              Dates = c(Dates_A,Dates_B,Dates_C)) 
+head(kids_heights_df)
+```
+
+Creating a tibble
+
+```{r}
+kids_heights_tbl <- tibble(Kid = c(rep("A",length(Lengths_A)), 
+                                   rep("B",length(Lengths_B)), 
+                                   rep("C",length(Lengths_C))), 
+                           Heights = c(Lengths_A,Lengths_B,Lengths_C), 
+                           Dates = c(Dates_A,Dates_B,Dates_C)) 
+head(kids_heights_tbl)
+```
+
+str: Compactly display the internal **str**ucture of an **R** object, a diagnostic function and an alternative to [`summary`](http://127.0.0.1:63270/help/library/utils/help/summary)
+
+```{r}
+str(kids_heights_df)
+str(kids_heights_tbl)
+```
+
+```{r}
+kids_heights_tbl_grp <- group_by(kids_heights_tbl,Kid) 
+str(kids_heights_tbl_grp)
+```
+
+```{r}
+kids_heights_tbl_grp = mutate(kids_heights_tbl_grp, 
+                              Birth = min(Dates), Age = Dates - min(Dates))
+kids_heights_tbl_grp
+```
+
+```{r}
+kids_heights_tbl_grp <- kids_heights_tbl %>% 
+  group_by(Kid) %>% 
+  mutate(Birth = min(Dates), Age = Dates - min(Dates)) 
+str(kids_heights_tbl_grp)
+```
+
+###  

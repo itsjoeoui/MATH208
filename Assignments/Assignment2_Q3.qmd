@@ -1,0 +1,42 @@
+---
+title: "Assignment2_Q3"
+format: html
+editor: visual
+---
+
+```{r}
+#| output: false
+library(AER)
+data("CASchools")
+library(tidyverse)
+```
+
+**a. Create a new tibble called CASchools_A2_3 (with twice as many rows as the original) called which contains the following variables from the original CASchools : school and county as well as two new columns: a single column containing both the reading AND math average exam scores and another column which indicates whether the ﬁrst column contains a read score or a math score. Name this new tibble CA_Schools_A2_3\_LONG . Hint: The suggested name for the tibble gives away the answer on what to do!**
+
+```{r}
+CASchools_A2_3_LONG <- as_tibble(CASchools) %>% 
+  select(school, county, read, math) %>% 
+  pivot_longer(cols=c(read, math), names_to = "ScoreType", values_to = "Score")
+
+CASchools_A2_3_LONG
+```
+
+**b. Using CA_Schools_A2_3\_LONG , create a summary table called CA_Schools_3\_summary with a row for read and a row for math for each county where the columns are the minimum, maximum, median and IQR of the school average scores by county for that test.**
+
+```{r}
+CA_Schools_3_summary <- CASchools_A2_3_LONG %>% 
+  group_by(county, ScoreType) %>% 
+  select(county, ScoreType, Score) %>% 
+  summarise_all(list(Min=min, Max=max, Med=median, IQR=IQR)) %>% 
+  ungroup()
+
+CA_Schools_3_summary
+```
+
+**c. Using CA_Schools_3\_summary , reformat the summary table to wide format where read and math are now two columns and there are columns for county and the name of the statistic that was computed in part (b).**
+
+```{r}
+CA_Schools_3_summary %>% 
+  pivot_longer(cols=c(Min, Max, Med, IQR), names_to = "Measure") %>%
+  pivot_wider(id_cols=c(county, Measure), names_from=ScoreType)
+```

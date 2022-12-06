@@ -1,0 +1,40 @@
+---
+title: "Assignment3_Q2"
+format: html
+editor: visual
+---
+
+```{r}
+#| output: false
+library(mice)
+data(brandsma) 
+str(brandsma)
+```
+
+```{r}
+q2_drop_cor <- function(data, drop_col_or_row) {
+  if (drop_col_or_row == "col") {
+    cor(data[, apply(is.na(data), 2, sum) == 0])
+  } else if (drop_col_or_row == "row") {
+    cor(data[apply(is.na(data), 1, sum) == 0, ])
+  } else {
+    print("drop_col_or_row should equal 'col' or 'row'")
+  }
+}
+```
+
+```{r}
+q2_drop_cor(brandmsa, "duck")
+```
+
+```{r}
+q2_drop_cor(brandsma, "col")
+```
+
+```{r}
+q2_drop_cor(brandsma, "row")
+```
+
+```{r}
+
+```

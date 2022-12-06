@@ -1,0 +1,53 @@
+---
+title: "Tutorial_3"
+output: pdf_document
+date: "2022-09-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(tidyverse)
+```
+
+
+```{r}
+lws_tbl = as_tibble(read.csv("lansWoods.csv"))
+```
+
+
+```{r}
+class(lws_tbl)
+```
+
+
+```{r}
+lws_tbl = read_csv("lansWoods.csv")
+```
+
+
+```{r}
+class(lws_tbl)
+```
+```{r}
+head(lws_tbl)
+```
+
+```{r}
+maphick_tbl <- lws_tbl %>% filter(Species=="maple" | Species=="hickory")
+```
+
+
+```{r}
+print(maphick_tbl)
+```
+
+```{r}
+ggplot(maphick_tbl, aes(x=x, y=y, col=Species, shape=Species)) + geom_point() +labs(title="Lansing Woods", x="", y="")
+```
+```{r}
+ggplot(maphick_tbl, aes(x=x, y=y,col=Species, shape=Species)) + geom_point(colour="black") +labs(title="Lansing Woods", x="", y="") + facet_wrap(~Species) +geom_density2d()
+```
+

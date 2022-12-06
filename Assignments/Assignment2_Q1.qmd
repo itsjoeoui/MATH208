@@ -1,0 +1,73 @@
+---
+title: "Assignment2_Q1"
+format: html
+editor: visual
+---
+
+```{r}
+#| output: false
+library(AER)
+data("CASchools")
+```
+
+```{r}
+head(CASchools)
+```
+
+```{r}
+str(CASchools)
+```
+
+```{r}
+help("CASchools")
+```
+
+**a. Create a new tibble named CASchools_A2 to use for this assignment from the data.frame CASchools. Show that your object is of the correct class by showing the output of class(CASchools_A2) in your answer.**
+
+```{r}
+#| output: false
+library(tidyverse)
+CASchools_A2 <- as_tibble(CASchools)
+```
+
+```{r}
+class(CASchools_A2)
+```
+
+**b. Create a boxplot and a histogram (using one or two ﬁgures, either way is ﬁne) of the school average reading exam scores. Describe the distribution of reading scores in a few sentences. What is one important advantage that the histogram has over the boxplot for this particular dataset?**
+
+```{r}
+ggplot(CASchools_A2, aes(x=NULL, y=read)) + 
+  geom_boxplot() + xlab("") + 
+  ylab("School Average Reading Exam Scores") + 
+  stat_boxplot(geom="errorbar", width=0.25)
+```
+
+```{r}
+ggplot(CASchools_A2, aes(x=read)) + 
+  geom_histogram(col="black", bins=30) + 
+  xlab("School Average Reading Exam Scores")
+```
+
+By plotting the read score data, we can see that its medium is approximatly 655 from the boxplot. Moreover, 50% of the data is in between approximately 640 to 670. The min is around 605 and the max is around 705. There seem to be no outliers from the boxplot. From the histogram, we can also see the approximate min and max. However, we are not able to easily see the 25%-ile, 75%-ile and the medium compared to the boxplot. Instead, we do get a better sense of the overall distribution of the data. We can also tell that there seems to be two central locations, one centered around 640 and another around 662. Overall, we can also see that the data is not too spread out.
+
+One important advantage that the histogram has over the boxplot for this particular dataset is that the histogram better demonstrates the shape or known as the distribution of the data. From the histogram, we can have a better sense of the count for each score range. Overall, it allows us to better access the shape, skew and spread of the data.
+
+**c. Remake just the histogram from part (b) with the following characteristics:**
+
+-   with a y-axis that is not the counts of bins, but instead the density;
+
+-   using only 10 bins instead of the default 30;
+
+-   containing also a density line that has approximate smoothness similar to the histogram (note: you can just experiment and it does not need to be perfect).
+
+```{r}
+ggplot(CASchools_A2, aes(x=read)) + 
+  geom_histogram(aes(y=..density..), bins=10, col="black") + 
+  xlab("School Average Reading Exam Scores") +
+  geom_density(size=1.5, adjust=1.5)
+```
+
+**Explain one advantage and one disadvantage of using fewer bins and a more smoothed density for this particular dataset.**
+
+For this particular dataset, one advantage of having a fewer bins and a more smoothed density is that it better conveys the message that this dataset is normally distributed and it centers around 655. However, the disadvantage of this is that we are losing information or details about this dataset. For example, in the less smoothed, more bins version, we can see that it almost has two concentrations, one around 640 and another one around 662), and this information is lost in the new graph.

@@ -1,0 +1,997 @@
+---
+title: "Programming_In_R"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(knitr)
+```
+
+```{r}
+# Read in the CSV
+HTRU2 <- read_csv("HTRU2/HTRU_2.csv", col_names=FALSE)
+# Name the variables
+names(HTRU2) = c("Mean_IP", "SD_IP", "EK_IP", "SKW_IP",
+                 "Mean_DMSNR", "SD_DMSNR", "EK_DMSNR", 
+                 "SKW_DMSNR", "Class")
+```
+
+```{r}
+HTRU2 <- HTRU2 %>%
+  mutate(Class=factor(ifelse(Class==0,"Negative","Positive")))
+```
+
+```{r}
+glimpse(HTRU2)
+```
+
+```{r}
+htru2_sum <- function() {
+  c("success")
+}
+```
+
+```{r}
+class(htru2_sum)
+```
+
+```{r}
+body(htru2_sum)
+```
+
+```{r}
+htru2_sum()
+```
+
+```{r}
+htru2_sum <- function(htru2_df) {
+  class(htru2_df)
+}
+htru2_sum(HTRU2)
+```
+
+```{r}
+htru2_sum <- function(htru2_df){
+# This function groups by Class and summarises # the selected variables
+# by the mean
+htru2_df %>% group_by(Class) %>%
+    summarise_at(vars(Mean_IP:SKW_IP),mean)
+}
+htru2_sum(HTRU2)
+```
+
+```{r}
+mean_results_IP <- htru2_sum(HTRU2)
+mean_results_IP
+```
+
+```{r}
+baby_fun <- function(x) { 
+  sum(x) # sum(x) gets lost since it is not the last statement
+  print("Success!")
+}
+baby_fun(c(1:4))
+```
+
+```{r}
+baby_fun <- function(x) { 
+  print(x[3])
+  sum(x)
+}
+a <- baby_fun(c(1:4))
+```
+
+```{r}
+baby_fun <- function(x) { 
+  return(sum(x)) 
+  print("Success!")
+}
+baby_fun(c(1:4))
+```
+
+```{r}
+htru2_sum <- function(htru2_df, which_vars, which_fun) {
+  htru2_df %>% 
+    group_by(Class) %>%
+    summarise_at(which_vars, which_fun)
+}
+
+htru2_sum(htru2_df = HTRU2, which_vars = vars(Mean_IP:SKW_IP), which_fun = mean)
+```
+
+```{r}
+htru2_sum <- function(htru2_df,which_vars,which_fun=mean){ 
+  htru2_df %>% 
+    group_by(Class) %>%
+    summarise_at(which_vars,which_fun)
+}
+htru2_sum(HTRU2, which_vars=vars(Mean_IP:SKW_IP))
+
+```
+
+```{r}
+htru2_sum <- function(htru2_df, grouped=TRUE, which_vars, which_fun=mean) {
+  if(grouped) {
+    htru2_df %>% 
+      group_by(Class) %>% 
+      summarise_at(which_vars,which_fun)
+  }
+  else {
+    htru2_df %>% 
+      summarise_at(which_vars,which_fun)
+  } 
+}
+```
+
+```{r}
+htru2_sum(HTRU2, grouped=FALSE, which_vars=vars(Mean_IP:SKW_IP))
+```
+
+```{r}
+htru2_sum(HTRU2, which_vars=vars(Mean_IP:SKW_IP))
+```
+
+```{r}
+htru2_sum <- function(htru2_df, one_or_both = "Both", which_vars, which_fun = mean){
+  if (one_or_both == "Both") { 
+    print("Summaries for both classes") 
+    htru2_df %>% group_by(Class) %>% 
+      summarise_at(which_vars,which_fun)
+  } else if (one_or_both == "Neither") {
+    print("Marginal summaries")
+    htru2_df %>% 
+      summarise_at(which_vars,which_fun)
+  } else {
+    print(str_c("Summaries for group",one_or_both,sep = " ")) 
+    htru2_df %>% 
+      filter(Class == one_or_both) %>% 
+      summarise_at(which_vars,which_fun)
+  }
+}
+```
+
+```{r}
+head(HTRU2)
+
+```
+
+```{r}
+htru2_sum(HTRU2, one_or_both = "Both", which_vars = vars(Mean_IP:SKW_IP))
+
+```
+
+```{r}
+htru2_sum(HTRU2, one_or_both = "Neither", which_vars = vars(Mean_IP:SKW_IP))
+
+```
+
+```{r}
+a <- c(1, 2, 3)
+ifelse(a %% 2 == 0, "Even", "Odd")
+
+```
+
+```{r error=TRUE}
+if (a %% 2 == 0) {
+  print("Even")
+} else {
+  print("Odd")
+}
+```
+
+```{r}
+htru2_sum_switch <- function(htru2_df, one_or_both = "Both", which_vars, which_fun = mean) {
+  print(str_c("Printing summaries for: ", one_or_both)) 
+  switch(one_or_both,
+    Both = htru2_df %>% 
+      group_by(Class) %>%
+      summarise_at(which_vars, which_fun),
+    Neither = htru2_df %>% 
+      summarise_at(which_vars, which_fun),
+    Negative = htru2_df %>% 
+      filter(Class == "Negative") %>%
+      summarise_at(which_vars, which_fun),
+    Positive = htru2_df %>% 
+      filter(Class == "Positive") %>%
+      summarise_at(which_vars, which_fun)
+  )
+}
+```
+
+```{r}
+htru2_sum_switch(HTRU2, one_or_both = "Negative", which_vars = vars(Mean_IP:SKW_IP))
+
+```
+
+## Environment
+
+```{r}
+environment()
+```
+
+```{r}
+ls()
+
+```
+
+```{r}
+print(ls.str(), max.level = 0)
+
+```
+
+```{r}
+my_global_fun <- function(x) {
+  len_x <- length(x) 
+  y <- seq(-len_x/2,len_x/2, length = len_x) 
+  euclid_dist <- function(x,y) {
+    sum((x - y)^2)
+  }
+  euclid_dist(x,y)
+}
+```
+
+```{r}
+environment(my_global_fun)
+
+```
+
+```{r error=TRUE}
+environment(euclid_dist)
+
+```
+
+```{r}
+my_global_fun <- function(x) {
+  # R funcitons always make a copy of x.
+  len_x <- length(x) 
+  y <- seq(-len_x/2,len_x/2, length=len_x) 
+  euclid_dist <- function(x,y) {
+    sum((x-y)^2)
+  }
+  print("Euclid_dist environ:")
+  print(environment(euclid_dist))
+  # Cannot see the global environment
+  print(ls.str())
+  euclid_dist(x,y)
+}
+```
+
+```{r}
+my_global_fun(c(1,2,3))
+```
+
+```{r}
+w <- c(0.1,0.2,0.3,0.4)
+z <- c(10,15,20,30)
+
+sum(z*w)
+
+```
+
+```{r}
+my_boring_fun <- function(z,w){ 
+  z <- c(0,0,0,0)
+  sum(z*w)
+}
+my_boring_fun(z,w)
+z
+```
+
+```{r}
+this_is_global <- c(1,2,3)
+not_a_good_idea <- function(){ 
+  this_is_global[2]<-10 # Yes, function can access global, but it always make a copy
+  this_is_global
+}
+# This is why the two outputs are different.
+not_a_good_idea()
+this_is_global
+```
+
+```{r}
+temp<-not_a_good_idea()
+temp
+this_is_global
+
+```
+
+```{r}
+are_you_kidding <- c(1,2,3)
+terrible_idea <- function(){ 
+  2*are_you_kidding
+}
+terrible_idea()
+are_you_kidding
+```
+
+```{r}
+# findGlobals is a very useful function.
+# This allows me to see what my function tries to access in the global environement
+# In this case, it shows us terrible_idea is accessing the global are_you_kidding
+codetools::findGlobals(terrible_idea)
+```
+
+```{r}
+ls()
+```
+
+```{r}
+# with: Treat HTRU2 as an environment
+with(HTRU2, ls())
+```
+
+```{r error=TRUE}
+mean(EK_IP)
+```
+
+```{r}
+with(HTRU2, mean(EK_IP))
+```
+
+```{r}
+boxplot(Mean_IP~Class, ylab="Mean IP", xlab="Class", data=HTRU2, col=c(2,4))
+```
+
+```{r}
+plot(HTRU2$Mean_IP, 
+     HTRU2$Mean_DMSNR, 
+     col = ifelse(HTRU2$Class == "Negative", 2, 4),
+     pch = 16,
+     xlab = "Mean IP", 
+     ylab = "Mean DMNSR"
+)
+```
+
+```{r}
+with(HTRU2,
+     plot(
+       Mean_IP,
+       Mean_DMSNR,
+       col = ifelse(Class == "Negative", 2, 4),
+       pch = 16,
+       xlab = "Mean IP", 
+       ylab = "Mean DMNSR"))
+```
+
+## Basic Iteration
+
+```{r}
+f_x <- function(x, target) {
+  x^3 - target
+}
+df_x <- function(x, target) {
+  3*x^2
+}
+```
+
+```{r}
+library(Deriv)
+```
+
+```{r}
+df_x <- Deriv(f_x, "x")
+```
+
+```{r}
+df_x
+```
+
+```{r}
+library(stringr)
+for (letter in LETTERS) {
+  if (letter %in% c("A", "E", "I", "O", "U")) {
+    print(str_c(letter, "is a vowel", sep=" "))
+  }
+}
+```
+
+```{r}
+for (i in 1:26) {
+  if (LETTERS[i] %in% c("A", "E", "I", "O", "U")) {
+    print(str_c(LETTERS[i], "is a vowel", sep=" "))
+  }
+}
+```
+
+```{r}
+for (i in seq_along(LETTERS)) {
+  if (LETTERS[i] %in% c("A", "E", "I", "O", "U")) {
+    print(str_c(LETTERS[i], "is a vowel", sep=" "))
+  }
+}
+```
+
+```{r}
+newtons_method <- function(init, g_x, dg_x, nsteps=10, ...) {
+  current <- init
+  print(str_c("Step:", 0, "x=:", current, "f(x):", g_x(current, ...), sep = " "))
+  
+  for (i in 1:nsteps) {
+    current <- current - g_x(current, ...) / dg_x(current, ...)
+    print(str_c("Step:", i, "x=:", current, "f(x):", g_x(current, ...), sep = " "))
+  }
+  current
+}
+```
+
+```{r}
+newtons_method(9, f_x, df_x, nsteps = 10, target = 125)
+```
+
+```{r}
+h_x <- function(x, target) {
+  cos(x) - target
+}
+
+dh_x <- Deriv(h_x, "x")
+
+newtons_method(0.9, h_x, dh_x, nsteps = 10, target = -1)
+```
+
+```{r}
+# ... passes whatever arguments down
+newtons_method_while <- function(init, g_x, dg_x, 
+                                 eps_f = 1e-8, 
+                                 eps_df = 1e-8, 
+                                 eps_x = 1e-8, 
+                                 maxsteps = 50, ...) {
+  # Set current to initial value
+  current <- init
+  # Set number of steps to zero
+  nsteps <- 0
+  # Print current status
+  print(str_c("Step:", nsteps, "x=:", current, "f(x):", g_x(current, ...), sep = " "))
+  
+  flag <- TRUE
+  
+  while (flag) {
+    previous <- current
+    nsteps <- nsteps + 1
+    # Gradient update
+    current <- current - g_x(current, ...) / dg_x(current, ...) 
+    print(
+      str_c("Step:", nsteps, "x=:", current, "f(x):", g_x(current, ...), 
+            "df(x):", dg_x(current, ...), sep = " ")) # Update condition
+    flag <- all(abs(previous - current) > eps_x, 
+                abs(g_x(previous, ...) - g_x(current, ...)) > eps_x, 
+                abs(dg_x(previous, ...) - dg_x(current,...)) > eps_df)
+    # If taking too long
+    if (nsteps >= maxsteps) { 
+      break;
+    } 
+  }
+  # Return current value
+  current 
+}
+```
+
+```{r}
+newtons_method_while(0.9, f_x, df_x, target = 125)
+```
+
+## Iterating over objects
+
+```{r}
+library(gapminder)
+glimpse(gapminder)
+```
+
+```{r}
+gap_list_country <- with(gapminder, split(gapminder, country))
+```
+
+```{r}
+length(gap_list_country)
+```
+
+```{r}
+head(gap_list_country)
+```
+
+```{r}
+names(gap_list_country)[1:5]
+```
+
+```{r}
+num_countries <- length(gap_list_country)
+
+correlations <- vector("numeric", num_countries)
+
+```
+
+```{r}
+head(correlations)
+```
+
+```{r}
+names(correlations) <- names(gap_list_country)
+```
+
+```{r}
+head(correlations)
+```
+
+```{r}
+for (i in seq_along(gap_list_country)) {
+  correlations[i] <- with(gap_list_country[[i]],
+                          cor(gdpPercap, lifeExp))
+}
+```
+
+```{r}
+head(correlations)
+```
+
+```{r}
+# Don't use for to loop over object, use lapply,etc. 
+# For loop is too slow for objects
+cor_for_lapply <- function(x) {
+  with(x, cor(gdpPercap, lifeExp))
+}
+```
+
+```{r}
+# lapply takes a list and a function
+correlations_lapply <- lapply(gap_list_country, cor_for_lapply)
+```
+
+```{r}
+head(correlations_lapply)
+```
+
+```{r}
+head(unlist(correlations_lapply))
+```
+
+```{r}
+hist(unlist(correlations_lapply), breaks = 30,
+     main = c("Distribution of correlations"),
+     xlab = c("Correlation"))
+```
+
+```{r}
+# sapply is a user-friendly version and wrapper of lapply by default returning a vector, matrix or, if simplify = "array", an array if appropriate
+
+correlations_sapply <- sapply(gap_list_country, cor_for_lapply)
+head(correlations_sapply)
+```
+
+```{r}
+# map takes in a list and spit outs a list
+using_cor_map <- gap_list_country %>% map(cor_for_lapply)
+```
+
+```{r}
+head(using_cor_map)
+```
+
+```{r}
+using_cor_map_dbl <- gap_list_country %>% map_dbl(cor_for_lapply)
+```
+
+```{r}
+head(using_cor_map_dbl)
+```
+
+```{r}
+using_cor_map_anon <- gap_list_country %>%
+  map_dbl(function(x) {
+    with(x, cor(lifeExp, gdpPercap))
+  })
+head(using_cor_map_anon)
+```
+
+```{r}
+using_cor_map_anon2 <- gap_list_country %>%
+  map_dbl(~with(.x, cor(lifeExp, gdpPercap)))
+head(using_cor_map_anon2)
+```
+
+```{r}
+my_lexp_summaries <- with(gapminder, tapply(lifeExp, data.frame(year, continent), mean))
+```
+
+```{r}
+class(my_lexp_summaries)
+```
+
+```{r}
+head(my_lexp_summaries)
+```
+
+```{r}
+matplot(as.numeric(rownames(my_lexp_summaries)),
+        my_lexp_summaries, type="b", pch = 16,
+        lwd = 2, lty = 1, xlab = "Year", ylab = "Life Exp",
+        ylim = c(30,100), col = c(1:4, 6))
+legend(x = 1950, y = 100, legend = colnames(my_lexp_summaries),
+       lwd = 2, col = c(1:4, 6, cex = 0.75))
+```
+
+```{r}
+my_lexp_summaries_plot <- cbind(
+  Year = as.numeric(rownames(my_lexp_summaries)),
+  as.data.frame(my_lexp_summaries)
+)
+
+head(my_lexp_summaries_plot)
+```
+
+```{r}
+library(reshape2)
+my_lexp_summaries_plot <- melt(
+  my_lexp_summaries_plot,
+  variable.name = "Continent",
+  value.name = "Mean_Life_Exp",
+  id.vars = "Year"
+)
+
+head(my_lexp_summaries_plot)
+```
+
+```{r}
+ggplot(my_lexp_summaries_plot, 
+       aes(x = as.numeric(Year),
+           y = Mean_Life_Exp,
+           col = Continent)
+       ) + geom_point() + geom_line()
+```
+
+```{r}
+library(ltm)
+```
+
+```{r}
+data(Mobility)
+```
+
+```{r}
+head(Mobility)
+```
+
+```{r}
+Mobility_new <- Mobility
+```
+
+```{r}
+# Apply function:
+# 1 = each row
+# 0 = each column
+Mobility_new$TotalScore <- apply(Mobility, 1, sum)
+head(Mobility_new)
+```
+
+```{r}
+my_summaries <- function(x) {
+  y <- c(mean(x), sd(x))
+  names(y) <- c("Mean", "Sd")
+  y
+}
+
+apply(Mobility_new, 2, my_summaries) %>% t(.)
+
+```
+
+## Arrays (every elements must be the same type)
+
+```{r}
+lifeExp_array <- with(gapminder, tapply(lifeExp, data.frame(year, country), c))
+lifeExp_array[1:5, 1:3]
+```
+
+```{r}
+dim(lifeExp_array)
+```
+
+```{r}
+alltogether <- array(NA, dim = c(12, 142, 3),
+                     dimnames = list(year = dimnames(lifeExp_array)$year,
+                                     country = dimnames(lifeExp_array)$country,
+                                     var = c("lifeExp", "gdpPercap", "pop")))
+
+alltogether[,,"lifeExp"] <- with(gapminder, tapply(lifeExp, data.frame(year, country), c))
+alltogether[,,"gdpPercap"] <- with(gapminder, tapply(gdpPercap, data.frame(year, country), c))
+alltogether[,,"pop"] <- with(gapminder, tapply(pop, data.frame(year, country), c))
+```
+
+```{r}
+dim(alltogether)
+```
+
+```{r}
+print(dimnames(lifeExp_array)$year)
+```
+
+```{r}
+alltogether[1:2, 1:2, c(1,3)] # c(1,3) means 1 and 3 not 1-3
+```
+
+```{r}
+apply(alltogether, c(1,3), mean)
+```
+
+```{r}
+totalGDP <- alltogether[,,"pop"] * alltogether[,,"gdpPercap"]
+```
+
+```{r}
+totalGDP[1:3, 2:4]
+```
+
+```{r}
+sort(apply(alltogether[,,"pop"] * alltogether[,,"gdpPercap"], 2, sum) / 1e12, dec = TRUE)[1:4]
+```
+
+```{r}
+aperm(alltogether, c(2,3,1))[1:5, 1:3, 1:2]
+```
+
+```{r}
+min_max_array <- apply(alltogether, c(2,3), function(x) {
+  y <- c(min(x), max(x));
+  names(y) <- c("Min", "Max");
+  y
+})
+```
+
+```{r}
+min_max_array[, 1:3, 1:2]
+```
+
+```{r}
+syph_data <- read_csv("syphilis89d.csv")
+```
+
+```{r}
+syph_data[sample(1:nrow(syph_data), 8),]
+```
+
+```{r}
+syph_counts <- syph_data %>% group_by(Sex, Race, Age) %>% count()
+```
+
+```{r}
+dim(syph_counts)
+```
+
+```{r}
+syph_counts %>% arrange(desc(n)) %>% head()
+```
+
+```{r}
+syph_counts %>% group_by(Race) %>% summarise(sum(n))
+```
+
+```{r}
+syph_counts %>% group_by(Age) %>% summarise(sum(n))
+```
+
+```{r}
+syph_counts_array <- xtabs(~Sex+Race+Age, data = syph_data)
+dim(syph_counts_array)
+```
+
+```{r}
+head(syph_counts_array)
+```
+
+```{r}
+syph_counts_array[1:2, 1:3, c(2,4)]
+```
+
+```{r}
+apply(syph_counts_array, 2, sum)
+```
+
+```{r}
+apply(syph_counts_array, "Race", sum)
+```
+
+```{r}
+dimnames(syph_counts_array)
+```
+
+```{r}
+apply(syph_counts_array, c("Race", "Age"), sum)
+```
+
+```{r}
+myplot <- barplot(apply(syph_counts_array, c("Age", "Race"), sum),
+                  col = grey(seq(0, 1, length = 4)))
+legend("topright", fill = grey(seq(0, 1, length = 4)),
+       legend = levels(factor(syph_data$Age)))
+```
+
+```{r}
+column_props <- apply(syph_counts_array, c("Age", "Race"), sum) %>%
+  prop.table(., 2)
+column_props
+```
+
+```{r}
+layout(matrix(c(1,2), nrow = 1), c(2,1))
+
+myplot <- barplot(column_props, col = grey(seq(0, 1, length = 4)))
+
+plot(c(0,0), type = "n", axes = FALSE, ylab = "", xlab = "")
+
+legend("center", fill = grey(seq(0, 1, length = 4)),
+       legend = levels(factor(syph_data$Age)))
+```
+
+```{r}
+convolve_loop_one <- function(vec_1, vec_2) {
+  n <- length(vec_1)
+  m <- length(vec_2)
+  
+  vec_1_star <- c(vec_1, rep(0, n + m - 1 - n))
+  vec_2_star <- c(vec_2, rep(0, n + m - 1 - m))
+  
+  k <- n + m - 1
+  
+  new_vec <- rep(0, k)
+  
+  for (i in 1:k) {
+    for (u in seq(max(1, i - k + 1), min(i, k), by = 1)) {
+      new_vec[i] <- new_vec[i] + vec_1_star[u] * vec_2_star[i - u + 1]
+    }
+  }
+  new_vec
+}
+```
+
+```{r}
+convolve_loop_one(c(1,2,3), c(0.5,0.25))
+```
+
+```{r}
+library(pracma)
+```
+
+```{r}
+conv(c(1,2,3), c(0.5,0.25))
+```
+
+```{r}
+library(microbenchmark)
+res <- microbenchmark(Loop_1 = convolve_loop_one(c(1,2,3), c(0.5,0.25)),
+                      pracma_conv = conv(c(1,2,3), c(0.5,0.25)),
+                      times = 1000L)
+res
+```
+
+```{r}
+ggplot(res, aes(x = expr, y = time)) + geom_boxplot() + scale_y_log10()
+```
+
+```{r}
+convolve_loop_two <- function(vec_1, vec_2) {
+  n <- length(vec_1)
+  m <- length(vec_2)
+  
+  vec_1_star <- c(vec_1, rep(0, n + m - 1 - n))
+  vec_2_star <- c(vec_2, rep(0, n + m - 1 - m))
+  
+  k <- n + m - 1
+  
+  new_vec <- rep(0, k)
+  
+  for (i in 1:k) {
+    u <- seq(max(1, i - k + 1), min(i,k), by = 1)
+    new_vec[i] <- sum(vec_1_star[u] * vec_2_star[i - u + 1])
+  }
+  new_vec
+}
+```
+
+```{r}
+res <- microbenchmark(Loop_1 = convolve_loop_one(c(1,2,3), c(0.5,0.25)),
+                      Loop_2 = convolve_loop_two(c(1,2,3), c(0.5,0.25)),
+                      pracma_conv = conv(c(1,2,3), c(0.5,0.25)),
+                      times = 1000L)
+res
+```
+
+```{r}
+ggplot(res, aes(x = expr, y = time)) + geom_boxplot() + scale_y_log10() +
+  scale_x_discrete(labels = c("Loop 1", "Loop 2", "conv"))
+```
+
+```{r}
+vec_1 <- rep(c(1,2,3), 100)
+vec_2 <- rep(c(0.5, 0.25), 100)
+```
+
+```{r}
+res <- microbenchmark(Loop_1 = convolve_loop_one(vec_1, vec_2),
+                      Loop_2 = convolve_loop_two(vec_1, vec_2),
+                      pracma_conv = conv(vec_1, vec_2),
+                      times = 100L)
+res
+```
+
+```{r}
+ggplot(res, aes(x = expr, y = time)) + geom_boxplot() + scale_y_log10() +
+  scale_x_discrete(labels = c("Loop 1", "Loop 2", "conv"))
+```
+
+```{r}
+convolve_loop_three <- function(vec_1,vec_2){ 
+  ## Compute lengths of both vectors 
+  n <- length(vec_1)
+  m <- length(vec_2)
+  ## Pad vectors to avoid boundary issues
+  vec_1_star <- c(vec_1,rep(0, n + m - 1 - n)) 
+  vec_2_star <- c(vec_2,rep(0, n + m - 1 - m)) 
+  k <- n + m - 1
+  new_vec_list <- lapply(1:k, function(x){
+    u <- seq(max(1, x - k + 1),min(x, k),by = 1)
+    sum(vec_1_star[u] * vec_2_star[x - u + 1])
+  }) 
+}
+```
+
+```{r}
+res <- microbenchmark(Loop_1 = convolve_loop_one(vec_1, vec_2),
+                      Loop_2 = convolve_loop_two(vec_1, vec_2),
+                      Loop_3 = convolve_loop_three(vec_1, vec_2),
+                      pracma_conv = conv(vec_1, vec_2),
+                      times = 100L)
+res
+```
+
+```{r}
+ggplot(res, aes(x = expr, y = time)) + geom_boxplot() + scale_y_log10() +
+  scale_x_discrete(labels = c("Loop 1", "Loop 2", "Loop 3", "conv"))
+```
+
+```{r}
+
+```
+
+```{r}
+library(palmerpenguins)
+names(penguins)
+```
+
+```{r}
+nrow(penguins)
+```
+
+```{r}
+ncol(penguins)
+```
+
+```{r}
+head(penguins)
+```
+
+```{r}
+cont_table <- xtabs(~species+island+sex, data = penguins)
+```
+
+```{r}
+cont_table
+```
+
+```{r}
+cont_table %>% apply(., c(1,3), sum) %>% prop.table(., 1)
+```
+
+```{r}
+with(penguins, split(penguins, island)) %>%
+  map(~min(.$bill_length_mm, na.rm = TRUE))
+```
+
+```{r}
+with(penguins, split(penguins, island)) %>%
+  map_dbl(~min(.$bill_length_mm, na.rm = TRUE))
+```
+
+```{r}
+sapply(with(penguins, split(penguins, island)), function(x) {
+  min(x$bill_length_mm, na.rm = TRUE)
+})
+```

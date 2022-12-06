@@ -1,0 +1,59 @@
+---
+title: "Assignment1-Q1"
+output: pdf_document
+date: "2022-09-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 2
+
+a. Read the data into R using the read_csv function and save it to an R object named club_teams. Give the code you used to import the data into R and use the head() function to show the ﬁrst six rows of data.
+
+```{r} 
+library(tidyverse)
+```
+
+```{r}
+club_teams = read_csv("spi_global_rankings.csv")
+head(club_teams)
+```
+
+b. What class of object is club_teams?
+
+```{r}
+class(club_teams)
+```
+
+c. What is the mode of the column titled name?
+
+```{r}
+mode(club_teams$name)
+```
+
+d. Add a column (named: diffxG) to the club_teams object containing the diﬀerence between the oﬀensive expected goals (off) and the defensive expected goals (def).
+
+```{r}
+club_teams["diffxG"] = club_teams["off"] - club_teams["def"]
+head(club_teams)
+```
+
+e. Using slice and filter, write a line (or a few lines) of code that will return the ﬁrst ﬁve rows from the league Italy Serie A and save it to an object called first_five_serieA. Give your code and print this object (using print) to show that you have done it correctly. Recall: the == operator can be used to test for whether the value on the left hand side in a vector is equal to the value no the right hand side. Hint: the correct order of slice and ﬁlter matters!
+
+```{r}
+first_five_serieA = slice(filter(club_teams, league == "Italy Serie A"), 1:5)
+print(first_five_serieA)
+```
+
+
+f. Add a new column to club_teams called SPI_max_league_diff which contains the diﬀerence in SPI between the maximum SPI value **for that league* and the team in each row. In other words, the best team in each league should have an SPI_max_league_diff value of 0 and the second best team in each league should have a positive number (the diﬀerence between the league maximum and thir own SPI value). Hint: Think about the kid’s height example from class. Give your code for adding the column and use head to show the ﬁrst six rows of the updated object.
+
+```{r}
+club_teams <- club_teams %>% 
+  group_by(league) %>%
+  mutate(SPI_max_league_diff = max(spi)-spi) %>%
+  ungroup()
+head(club_teams)
+```

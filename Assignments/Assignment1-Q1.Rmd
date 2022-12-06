@@ -1,0 +1,60 @@
+---
+title: "Assignment1-Q1"
+output: pdf_document
+date: "2022-09-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1
+
+Assume that Prof. Steele creates the following list in R to help manage his life:
+
+```{r}
+shopping_list <- list(
+  Grocery = list(
+    Dairy = c("Milk","Cheese"),
+    Meat = c("Chicken","Sausage","Bacon"),
+    Spices = c("Cinnamon")
+  ), 
+  Pharmacy = c("Soap","Toothpaste","Toilet Paper")
+)
+```
+
+a. What objects (or values) are returned by the following lines of R code?
+
+```{r, eval = FALSE}
+shopping_list$Grocery[["Meat"]] 
+# [1] "Chicken" "Sausage" "Bacon" 
+
+shopping_list[[2]][1] 
+# [1] "Soap"
+
+shopping_list[["Pharmacy"]] 
+# [1] "Soap"         "Toothpaste"   "Toilet Paper"
+
+shopping_list[1][[c(1,1,2)]] 
+# [1] "Cheese"
+```
+
+b. Using R code, write statements which yield the following three results:
+
+Result 1:
+
+```{r}
+shopping_list["Grocery"]
+```
+
+Result 2:
+
+```{r}
+shopping_list[["Pharmacy"]][3]
+```
+
+Result 3:
+
+```{r}
+shopping_list[["Grocery"]]["Meat"]
+```

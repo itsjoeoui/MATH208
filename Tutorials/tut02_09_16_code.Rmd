@@ -1,0 +1,114 @@
+---
+title: "Tutorial 2"
+author: "Nicholas Kiriazis"
+date: "2022-09-15"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+```
+
+## Reading in the data
+
+The data file can be found on kaggle: https://www.kaggle.com/datasets/dansbecker/nba-shot-logs?resource=download
+
+```{r}
+data_tibble = read_csv("tut02_09_16_data.csv")
+```
+
+```{r}
+head(data_tibble)
+```
+
+Assume we are only interested in certain columns
+```{r}
+data_tibble = data_tibble[,c("LOCATION", "PERIOD", "SHOT_CLOCK", "DRIBBLES", "SHOT_DIST", "PTS_TYPE", "SHOT_RESULT", "player_name")]
+
+data_tibble["SHOT_RESULT"] = (data_tibble["SHOT_RESULT"] == "made")
+
+data_tibble
+```
+
+## Exploring the data
+
+Quick reminder about displaying
+```{r}
+c(1,2,3)
+```
+
+Now we make some plots to see if the data is okay.
+```{r}
+two_tibble = data_tibble[data_tibble$PTS_TYPE == 2,]
+
+two_plot = ggplot(two_tibble, aes(x=SHOT_DIST))
+```
+
+```{r}
+two_plot = two_plot + geom_histogram(bins=30, col="black", fill="lightblue")
+```
+
+```{r}
+print(two_plot)
+```
+
+```{r}
+two_plot = two_plot + geom_vline(xintercept=24, color="red")
+```
+
+```{r}
+print(two_plot)
+```
+
+## Filtering data
+
+We need to remove the impossible two point shots
+```{r}
+clean_tibble = data_tibble %>% filter(!(SHOT_DIST > 24 & PTS_TYPE==2))
+```
+
+Let's just make sure we filtered okay.
+```{r}
+ggplot(
+  filter(clean_tibble, PTS_TYPE==2), aes(x=SHOT_DIST)) + 
+  geom_histogram(bins=30, col="black", fill="lightblue") +
+  geom_vline(xintercept=24, color="red"
+)
+```
+## Doing fancy analysis
+
+Is there an advantage to shooting at home?
+```{r}
+loc_group = group_by(clean_tibble, LOCATION)
+
+loc_percentage = summarise(loc_group, RATE=sum(SHOT_RESULT)/length(SHOT_RESULT))
+loc_percentage
+```
+
+Does this trend hold for all players
+```{r}
+player_loc_percentage = 
+  group_by(clean_tibble, LOCATION, player_name) %>%   
+  summarise(RATE=sum(SHOT_RESULT)/length(SHOT_RESULT)) %>% 
+  ungroup()
+
+player_loc_percentage = arrange(player_loc_percentage, player_name)
+
+player_loc_percentage
+```
+Let's re-organize this into a more usable format
+```{r}
+home_values = filter(player_loc_percentage, LOCATION=="H")
+print(home_values)
+away_values = filter(player_loc_percentage, LOCATION!="H")
+print(away_values)
+```
+Since the values are in the same order across dataframes, we can easily work with this
+```{r}
+home_away_diff_tbl = tibble(HOME=home_values$RATE, AWAY=away_values$RATE)
+
+ggplot(home_away_diff_tbl, aes(x=HOME, y=AWAY)) + geom_point() + geom_abline(intercept = 0, slope=1, col="red")
+```

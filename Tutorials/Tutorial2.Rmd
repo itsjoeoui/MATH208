@@ -1,0 +1,48 @@
+---
+title: "Tutorial2"
+output: pdf_document
+date: "2022-09-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(tidyverse)
+head(iris)
+```
+```{r}
+class(iris)
+```
+
+```{r}
+iris_tbl = as_tibble(iris)
+```
+
+## Exercise 1: 
+add a new column to the Iris data set computed as: Petal.Area = Petal.Length × Petal.Width (we assume rectangular petals).
+
+```{r}
+head(iris_tbl)
+```
+
+```{r}
+iris_tbl["Petal.Area"] = iris_tbl["Petal.Length"] * iris_tbl["Petal.Width"]
+```
+
+
+```{r}
+head(iris_tbl)
+```
+
+## Exercise 2:
+Reproduce the following two plots
+
+```{r}
+ggplot(iris_tbl, aes(x=Petal.Area, group=Species)) + geom_histogram(aes(y=..density..), bins=30, col="black") + facet_grid(cols=vars(Species))
+```
+
+```{r}
+ggplot(iris_tbl, aes(x=Petal.Area, group=Species, fill=Species)) + geom_histogram(bins=10)
+```
